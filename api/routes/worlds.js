@@ -19,15 +19,11 @@ function authenticateToken(req, res, next) {
   });
 }
 
-router.get("/:id", async (req, res) => {
-  let roles = [];
-
-  roles = await World.find({ _id: req.params.id });
-
-  return res.json(roles);
+router.get("/:id", authenticateToken, async (req, res) => {
+  return res.json(await World.findById(req.params.id));
 });
 
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   let roles = [];
 
   roles = await World.find({});
@@ -35,21 +31,25 @@ router.get("/", async (req, res) => {
   return res.json(roles);
 });
 
-router.post("/", async (req, res) => {
-  const resp = await World.create(req.body);
-  res.json(resp);
+router.post("/", authenticateToken, async (req, res) => {
+  try {
+    const resp = await World.create(req.body);
+    res.json(resp);
+  } catch (error) {
+    console.log(error);
+  }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   const resp = await World.deleteOne({ _id: req.params.id });
 
   res.json(resp);
 });
 
-router.put("/", (req, res) => {
+router.patch("/", authenticateToken, async (req, res) => {
   const data = req.body;
 
-  World.findOneAndUpdate(
+  await World.findOneAndUpdate(
     { _id: data._id },
     data,
     { upsert: true },

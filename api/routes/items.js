@@ -19,37 +19,29 @@ function authenticateToken(req, res, next) {
   });
 }
 
-router.get("/:id", async (req, res) => {
-  let roles = [];
-
-  roles = await Item.find({ _id: req.params.id });
-
-  return res.json(roles);
+router.get("/:id", authenticateToken, async (req, res) => {
+  return res.json(await Item.findById(req.params.id));
 });
 
-router.get("/", async (req, res) => {
-  let roles = [];
-
-  roles = await Item.find({});
-
-  return res.json(roles);
+router.get("/", authenticateToken, async (req, res) => {
+  return res.json(await Item.find({}));
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
   const resp = await Item.create(req.body);
   res.json(resp);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   const resp = await Item.deleteOne({ _id: req.params.id });
 
   res.json(resp);
 });
 
-router.put("/", (req, res) => {
+router.patch("/", authenticateToken, async (req, res) => {
   const data = req.body;
 
-  Item.findOneAndUpdate(
+  await Item.findOneAndUpdate(
     { _id: data._id },
     data,
     { upsert: true },

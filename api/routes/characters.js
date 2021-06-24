@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
+  console.log(token);
 
   if (token == null) return res.sendStatus(401);
 
@@ -22,11 +23,7 @@ function authenticateToken(req, res, next) {
 }
 
 router.get("/:id", authenticateToken, async (req, res) => {
-  let roles = [];
-
-  roles = await Character.find({ _id: req.params.id });
-
-  return res.json(roles);
+  return res.json(await Character.findById(req.params.id));
 });
 
 router.get("/", authenticateToken, async (req, res) => {
@@ -48,7 +45,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   res.json(resp);
 });
 
-router.put("/", authenticateToken, (req, res) => {
+router.patch("/", authenticateToken, (req, res) => {
   const data = req.body;
 
   Character.findOneAndUpdate(

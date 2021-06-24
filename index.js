@@ -2,7 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 require("crypto").randomBytes(64).toString("hex");
 const dotenv = require("dotenv");
-const User = require("./models/User");
+const User = require("./api/models/User");
+var cors = require("cors");
 
 // get config vars
 dotenv.config();
@@ -22,9 +23,10 @@ mongoose.connect(
 );
 
 const jwt = require("jsonwebtoken");
-const routes = require("./routes");
+const routes = require("./api/routes");
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 app.use(
@@ -33,25 +35,29 @@ app.use(
   })
 );
 
-app.post("/auth", async (req, res) => {
+app.post("/auth/login", async (req, res) => {
   // ...
+  console.log(req.body);
   const user = await User.findOne({ login: req.body.login });
-  console.log(user);
+  console.log(user.password.toString(), req.body.password.toString());
+
   if (user) {
     console.log(user.password.toString(), req.body.password.toString());
     if (user.password === req.body.password) {
       const token = generateAccessToken({ username: req.body.username });
       res.json(token);
     } else {
-      res.send(401, "Usuario ou senha invalida");
+      res.status(401).send(res.json({ message: "Usuario ou senha invalida" }));
     }
+  } else {
+    res.status(401).send(res.json({ message: "Usuario ou senha invalida" }));
   }
 
   // ...
 });
 
-app.listen(3000, function () {
-  console.log("listening on 3000");
+app.listen(5000, function () {
+  console.log("listening on 5000");
 });
 
 app.use(routes);
